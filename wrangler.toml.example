@@ -1,0 +1,7 @@
+name = "remix-todo-app"
+compatibility_date = "2023-12-07"
+
+[[d1_databases]]
+binding = "DB" # i.e. available in your Worker on env.DB
+database_name = "remix-todo-db"
+database_id = "DATABASE_ID"

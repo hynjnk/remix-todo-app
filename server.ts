@@ -6,6 +6,10 @@ import { z } from "zod";
 
 export const AppEnvSchema = z.object({
   SESSION_SECRET: z.string(),
+  DISCORD_AUTH_CLIENT_ID: z.string(),
+  DISCORD_AUTH_CLIENT_SECRET: z.string(),
+  DISCORD_AUTH_CALLBACK_URL: z.string(),
+  DB: z.custom<D1Database>((value) => Boolean(value)),
 });
 
 declare module "@remix-run/cloudflare" {

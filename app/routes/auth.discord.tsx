@@ -6,7 +6,5 @@ import { getAuthenticator } from "~/services/auth.server";
 export const loader = async () => redirect("/");
 
 export const action = async ({ request, context }: ActionFunctionArgs) => {
-  return getAuthenticator(context).logout(request, {
-    redirectTo: "/",
-  });
+  return getAuthenticator(context).authenticate("discord", request);
 };
