@@ -5,9 +5,10 @@ import { z } from "zod";
 import { getTodoRepository } from "~/repositories/todo.server";
 import { getUser } from "~/services/auth.server";
 
-export const createTodoValidator = withZod(
+export const TODO_TEXT_MAX_LENGTH = 63;
+export const todoCreationValidator = withZod(
   z.object({
-    text: z.string().min(1).max(255),
+    text: z.string().min(1).max(TODO_TEXT_MAX_LENGTH),
   })
 );
 
@@ -18,7 +19,7 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
   const user = await getUser({ request, context });
 
   // Validate
-  const validateResult = await createTodoValidator.validate(
+  const validateResult = await todoCreationValidator.validate(
     await request.formData()
   );
   if (validateResult.error) {
@@ -34,6 +35,8 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
     return json({ errors: createResult.error }, { status: 500 });
   }
 
+  // wait 10000 ms
+  // await new Promise((resolve) => setTimeout(resolve, 1000));
   console.debug("Successfully created todo");
   return redirect("/dashboard");
 };
