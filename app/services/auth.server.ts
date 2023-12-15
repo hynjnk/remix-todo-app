@@ -9,7 +9,7 @@ import {
 import { getUserRepository } from "~/repositories/user.server";
 import { getSessionStorage } from "./session.server";
 
-type AuthenticatedUser = {
+export type AuthenticatedUser = {
   id: number;
   displayName: string;
 };

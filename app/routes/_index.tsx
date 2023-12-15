@@ -26,13 +26,13 @@ export default function Index() {
   const { error } = useLoaderData<typeof loader>();
 
   return (
-    <section className="w-full py-12 text-center md:py-24 lg:py-32">
+    <main className="w-full py-12 text-center md:py-24">
       <div className="container px-4">
-        <h1 className="text-4xl font-bold sm:text-5xl md:text-6xl">
+        <h1 className="text-4xl font-bold tracking-tight text-gray-900 md:text-6xl">
           Remix Todo App
         </h1>
-        <p className="mx-auto mt-6 max-w-[700px] text-lg text-gray-500">
-          Simple todo app built with Remix, Drizzle ORM and Cloudflare Pages
+        <p className="mt-6 text-lg text-gray-700">
+          Simple todo app built with Remix and Drizzle ORM, powered by Cloudflare Pages and D1
         </p>
       </div>
       <Form className="mt-8" action="/auth/discord" method="post">
@@ -42,13 +42,20 @@ export default function Index() {
           Login with Discord
         </Button>
       </Form>
-      {/* Source code */}
-      {/* Learn more */}
-    </section>
+      <div className="mt-6">
+        <a
+          href="https://github.com/hynjnk/remix-todo-app"
+          className="text-gray-700 underline hover:text-gray-500"
+        >
+          Source code
+        </a>
+      </div>
+    </main>
   );
 }
 
 const DiscordMarkWhite = ({ className }: { className: string }) => {
+  // https://discord.com/branding
   return (
     <svg
       className={className}

@@ -1,4 +1,4 @@
-# Welcome to Remix!
+# Remix To Do App
 
 - [Remix Docs](https://remix.run/docs)
 
@@ -20,3 +20,11 @@ Cloudflare Pages are currently only deployable through their Git provider integr
 If you don't already have an account, then [create a Cloudflare account here](https://dash.cloudflare.com/sign-up/pages) and after verifying your email address with Cloudflare, go to your dashboard and follow the [Cloudflare Pages deployment guide](https://developers.cloudflare.com/pages/framework-guides/deploy-anything).
 
 Configure the "Build command" should be set to `npm run build`, and the "Build output directory" should be set to `public`.
+
+## Stacks
+
+- Cloudflare [Pages](https://pages.cloudflare.com/) + [D1](https://developers.cloudflare.com/d1/)
+- [Remix](https://remix.run/)
+- [Drizzle ORM](https://orm.drizzle.team/)
+- remix-auth
+- remix-validated-form
