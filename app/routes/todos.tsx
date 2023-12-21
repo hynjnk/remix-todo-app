@@ -1,16 +1,13 @@
-import { json, redirect, type ActionFunctionArgs } from "@remix-run/cloudflare";
-import { withZod } from "@remix-validated-form/with-zod";
-import { validationError } from "remix-validated-form";
+import { parse } from "@conform-to/zod";
+import { json, type ActionFunctionArgs } from "@remix-run/cloudflare";
 import { z } from "zod";
 import { getTodoRepository } from "~/repositories/todo.server";
 import { getUser } from "~/services/auth.server";
 
 export const TODO_TEXT_MAX_LENGTH = 63;
-export const todoCreationValidator = withZod(
-  z.object({
-    text: z.string().min(1).max(TODO_TEXT_MAX_LENGTH),
-  })
-);
+export const todoCreationSchema = z.object({
+  text: z.string().min(1).max(TODO_TEXT_MAX_LENGTH),
+});
 
 export const action = async ({ request, context }: ActionFunctionArgs) => {
   console.debug("todos.tsx action called");
@@ -19,24 +16,28 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
   const user = await getUser({ request, context });
 
   // Validate
-  const validateResult = await todoCreationValidator.validate(
-    await request.formData()
-  );
-  if (validateResult.error) {
-    console.error("Failed to validate todo", validateResult.error);
-    return validationError(validateResult.error);
+  const formData = await request.formData();
+  const submission = parse(formData, {
+    schema: todoCreationSchema,
+  });
+  if (submission.intent !== "submit" || !submission.value) {
+    return json(submission);
   }
 
   // Create
   const todoRepo = getTodoRepository(context);
-  const createResult = await todoRepo.create(user.id, validateResult.data.text);
+  const createResult = await todoRepo.create(user.id, submission.value.text);
   if (createResult.error) {
     console.error("Failed to create todo", createResult.error);
-    return json({ errors: createResult.error }, { status: 500 });
+    throw createResult.error;
   }
 
-  // wait 10000 ms
-  // await new Promise((resolve) => setTimeout(resolve, 1000));
+  // await new Promise((resolve) => setTimeout(resolve, 10000)); // wait 10000 ms
+
   console.debug("Successfully created todo");
-  return redirect("/dashboard");
+  return json({
+    ...submission,
+    // Notify the client to reset the form using `null`
+    payload: null,
+  });
 };

@@ -1,12 +1,13 @@
+import { conform, useForm } from "@conform-to/react";
+import { parse } from "@conform-to/zod";
 import type { LoaderFunctionArgs } from "@remix-run/cloudflare";
-import { Form, useLoaderData } from "@remix-run/react";
+import { useFetcher, useLoaderData } from "@remix-run/react";
 import { Check, Loader2, X } from "lucide-react";
-import { ValidatedForm, useField, useIsSubmitting } from "remix-validated-form";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { getTodoRepository } from "~/repositories/todo.server";
-import { TODO_TEXT_MAX_LENGTH, todoCreationValidator } from "~/routes/todos";
 import { getUser } from "~/services/auth.server";
+import { TODO_TEXT_MAX_LENGTH, todoCreationSchema, type action } from "./todos";
 
 export const loader = async ({ request, context }: LoaderFunctionArgs) => {
   const user = await getUser({ request, context });
@@ -49,91 +50,139 @@ export default function Index() {
 }
 
 const TodoCreationForm = () => {
-  return (
-    <ValidatedForm
-      validator={todoCreationValidator}
-      resetAfterSubmit={true}
-      action="/todos"
-      method="post"
-    >
-      <TodoCreationInput name="text" />
-    </ValidatedForm>
-  );
-};
+  const todoCreationPath = "/todos";
+  const fetcher = useFetcher<typeof action>();
 
-const TodoCreationInput = ({ name }: { name: string }) => {
-  const { error, getInputProps } = useField(name);
+  const lastSubmission = fetcher.data;
+  const [form, { text }] = useForm({
+    lastSubmission,
+    shouldValidate: "onSubmit",
+    onValidate({ formData }) {
+      return parse(formData, { schema: todoCreationSchema });
+    },
+  });
+
+  const isSubmitting = fetcher.state === "submitting";
+
   return (
-    <div className="h-16">
-      <div className="flex space-x-2">
-        <Input
-          className="flex-auto"
-          {...getInputProps({ id: name })}
-          maxLength={TODO_TEXT_MAX_LENGTH}
-          placeholder="To Do..."
-        />
-        <TodoCreationSubmitButton />
+    <fetcher.Form action={todoCreationPath} method="post" {...form.props}>
+      <div className="h-16">
+        <div className="flex space-x-2">
+          <div className="flex-auto">
+            <Input
+              maxLength={TODO_TEXT_MAX_LENGTH}
+              placeholder="To Do..."
+              disabled={isSubmitting}
+              {...conform.input(text, { type: "text" })}
+            />
+            {text.errors?.map((error) => (
+              <p className="ml-2 mt-1 text-sm text-red-700" key={error}>
+                {error}
+              </p>
+            ))}
+          </div>
+          <Button
+            className="w-14 flex-none"
+            type="submit"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? (
+              <Loader2
+                aria-label="Adding..."
+                className="h-4 w-4 animate-spin"
+              />
+            ) : (
+              "Add"
+            )}
+          </Button>
+        </div>
       </div>
-      {error && <p className="ml-2 text-sm text-red-700">{error}</p>}
-    </div>
-  );
-};
-
-const TodoCreationSubmitButton = () => {
-  const isSubmitting = useIsSubmitting();
-  return (
-    <Button className="w-14 flex-none" type="submit" disabled={isSubmitting}>
-      {isSubmitting ? (
-        <Loader2 aria-label="Adding..." className="h-4 w-4 animate-spin" />
-      ) : (
-        "Add"
-      )}
-    </Button>
+    </fetcher.Form>
   );
 };
 
 const TodoCompletionForm = ({ todoId }: { todoId: string }) => {
+  const todoCompletionPath = `/todos/${todoId}/complete`;
+  const fetcher = useFetcher();
+  const isSubmitting = fetcher.state === "submitting";
+
   return (
-    <Form
+    <fetcher.Form
       className="flex items-center"
-      action={`/todos/${todoId}/complete`}
+      action={todoCompletionPath}
       method="post"
       preventScrollReset={true}
     >
-      <button
-        type="submit"
-        className="h-4 w-4 shrink-0 rounded-sm border border-primary text-background ring-offset-background hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-      >
-        <Check className="h-4 w-4" />
-      </button>
-    </Form>
+      {isSubmitting ? (
+        <Loader2 aria-label="Completing..." className="h-4 w-4 animate-spin" />
+      ) : (
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="h-4 w-4 shrink-0 rounded-sm border border-primary text-background ring-offset-background hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        >
+          <Check aria-label="Complete" className="h-4 w-4" />
+        </button>
+      )}
+    </fetcher.Form>
   );
 };
 
 const TodoUncompletionForm = ({ todoId }: { todoId: string }) => {
+  const todoUncompletionPath = `/todos/${todoId}/uncomplete`;
+  const fetcher = useFetcher();
+  const isSubmitting = fetcher.state === "submitting";
+
   return (
-    <Form
+    <fetcher.Form
       className="flex items-center"
-      action={`/todos/${todoId}/uncomplete`}
+      action={todoUncompletionPath}
+      method="post"
+      preventScrollReset={true}
+    >
+      {isSubmitting ? (
+        <Loader2
+          aria-label="Uncompleting..."
+          className="h-4 w-4 animate-spin"
+        />
+      ) : (
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="h-4 w-4 shrink-0 rounded-sm border border-gray-500 text-gray-500 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-ring focus-visible:ring-offset-2"
+        >
+          <Check aria-label="Uncomplete" className="h-4 w-4" />
+        </button>
+      )}
+    </fetcher.Form>
+  );
+};
+
+const TodoDeletionForm = ({ todoId }: { todoId: string }) => {
+  const todoDeletionPath = `/todos/${todoId}/delete`;
+  const fetcher = useFetcher();
+  const isSubmitting = fetcher.state === "submitting";
+
+  return (
+    <fetcher.Form
+      action={todoDeletionPath}
       method="post"
       preventScrollReset={true}
     >
       <button
         type="submit"
-        className="h-4 w-4 shrink-0 rounded-sm border border-gray-500 text-gray-500 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-ring focus-visible:ring-offset-2"
+        disabled={isSubmitting}
+        className="mx-4 h-6 w-6 rounded-full text-gray-500 hover:bg-destructive/90 hover:text-destructive-foreground"
       >
-        <Check className="h-4 w-4" />
+        {isSubmitting ? (
+          <Loader2
+            aria-label="Deleting..."
+            className="m-auto h-4 w-4 animate-spin"
+          />
+        ) : (
+          <X aria-label="Delete" className="m-auto h-4 w-4" />
+        )}
       </button>
-    </Form>
-  );
-};
-
-const TodoDeletionForm = ({ todoId }: { todoId: string }) => {
-  return (
-    <Form action={`/todos/${todoId}/delete`} method="post">
-      <button className="mx-4 h-6 w-6 rounded-full text-gray-500 hover:bg-destructive/90 hover:text-destructive-foreground">
-        <X className="m-auto h-4 w-4" aria-label="Delete" />
-      </button>
-    </Form>
+    </fetcher.Form>
   );
 };

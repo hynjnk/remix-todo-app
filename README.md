@@ -26,5 +26,6 @@ Configure the "Build command" should be set to `npm run build`, and the "Build o
 - Cloudflare [Pages](https://pages.cloudflare.com/) + [D1](https://developers.cloudflare.com/d1/)
 - [Remix](https://remix.run/)
 - [Drizzle ORM](https://orm.drizzle.team/)
-- remix-auth
-- remix-validated-form
+- [remix-auth](https://github.com/sergiodxa/remix-auth), [remix-auth-discord](https://github.com/JonnyBnator/remix-auth-discord)
+- [CONFORM](https://conform.guide/)
+- [shadcn/ui](https://ui.shadcn.com/), [Tailwind CSS](https://tailwindcss.com/)
