@@ -32,7 +32,8 @@ export default function Index() {
           Remix Todo App
         </h1>
         <p className="mt-6 text-lg text-gray-700">
-          Simple todo app built with Remix and Drizzle ORM, powered by Cloudflare Pages and D1
+          Simple todo app built with Remix and Drizzle ORM, hosted on Cloudflare
+          Pages and D1
         </p>
       </div>
       <Form className="mt-8" action="/auth/discord" method="post">

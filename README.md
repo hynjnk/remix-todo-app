@@ -1,6 +1,6 @@
 # Remix Todo App
 
-Simple todo app built with Remix and Drizzle ORM, powered by Cloudflare Pages and D1
+Simple todo app built with Remix and Drizzle ORM, hosted on Cloudflare Pages and D1
 
 ![Demo](./docs/demo.gif)
 
