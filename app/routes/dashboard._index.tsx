@@ -1,5 +1,5 @@
-import { conform, useForm } from "@conform-to/react";
-import { parse } from "@conform-to/zod";
+import { getFormProps, getInputProps, useForm } from "@conform-to/react";
+import { parseWithZod } from "@conform-to/zod";
 import type { LoaderFunctionArgs } from "@remix-run/cloudflare";
 import { useFetcher, useLoaderData } from "@remix-run/react";
 import { Check, Loader2, X } from "lucide-react";
@@ -53,19 +53,23 @@ const TodoCreationForm = () => {
   const todoCreationPath = "/todos";
   const fetcher = useFetcher<typeof action>();
 
-  const lastSubmission = fetcher.data;
-  const [form, { text }] = useForm({
-    lastSubmission,
+  const lastResult = fetcher.data;
+  const [form, fields] = useForm({
+    lastResult,
     shouldValidate: "onSubmit",
     onValidate({ formData }) {
-      return parse(formData, { schema: todoCreationSchema });
+      return parseWithZod(formData, { schema: todoCreationSchema });
     },
   });
 
   const isSubmitting = fetcher.state === "submitting";
 
   return (
-    <fetcher.Form action={todoCreationPath} method="post" {...form.props}>
+    <fetcher.Form
+      action={todoCreationPath}
+      method="post"
+      {...getFormProps(form)}
+    >
       <div className="h-16">
         <div className="flex space-x-2">
           <div className="flex-auto">
@@ -73,9 +77,9 @@ const TodoCreationForm = () => {
               maxLength={TODO_TEXT_MAX_LENGTH}
               placeholder="To Do..."
               disabled={isSubmitting}
-              {...conform.input(text, { type: "text" })}
+              {...getInputProps(fields.text, { type: "text" })}
             />
-            {text.errors?.map((error) => (
+            {fields.text.errors?.map((error) => (
               <p className="ml-2 mt-1 text-sm text-red-700" key={error}>
                 {error}
               </p>
