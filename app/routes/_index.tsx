@@ -36,7 +36,13 @@ export default function Index() {
           Pages and D1
         </p>
       </div>
-      <Form className="mt-8" action="/auth/discord" method="post">
+      <Form
+        className="mt-8"
+        action="/auth/discord"
+        method="post"
+        role="form"
+        name="login"
+      >
         {error ? <div>{error.message}</div> : null}
         <Button className="bg-[#5865f2] hover:bg-[#7289da]">
           <DiscordMarkWhite className="mr-2 h-4 w-4" />
