@@ -8,7 +8,7 @@ import {
   Scripts,
   ScrollRestoration,
 } from "@remix-run/react";
-import styles from "./globals.css";
+import styles from "./globals.css?url";
 
 export const meta: MetaFunction = () => {
   return [
